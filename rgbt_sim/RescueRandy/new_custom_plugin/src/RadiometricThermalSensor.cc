@@ -135,10 +135,13 @@ bool RadiometricThermalSensor::SaveRadiometricData(const uint16_t *_data,
   unsigned int dataSize = _width * _height * sizeof(uint16_t);
 
   // Convert to float32 and write
+  // Map uint16 range (0-65535) to temperature range (minTemp-maxTemp)
   std::unique_ptr<float[]> floatData = std::make_unique<float[]>(_width * _height);
+  float tempRange = this->maxTemp - this->minTemp;
   for (unsigned int i = 0; i < _width * _height; ++i)
   {
-    floatData[i] = this->minTemp + (static_cast<float>(_data[i]) * this->resolution);
+    float normalized = static_cast<float>(_data[i]) / 65535.0f;
+    floatData[i] = this->minTemp + (normalized * tempRange);
   }
 
   // Write header (width, height)
