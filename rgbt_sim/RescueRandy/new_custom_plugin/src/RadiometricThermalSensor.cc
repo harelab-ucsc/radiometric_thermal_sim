@@ -42,7 +42,7 @@ private:
   transport::Node node;
   std::string savePath;
   float minTemp = 253.15f;
-  float maxTemp = 320.0f;
+  float maxTemp = 373.0f;
   float resolution = 3.0f;
   uint64_t frameCounter = 0;
 
@@ -55,7 +55,7 @@ private:
 RadiometricThermalSensor::RadiometricThermalSensor()
     : savePath("./thermal_radiometric"),
       minTemp(253.15f),
-      maxTemp(320.0f),
+      maxTemp(373.0f),
       resolution(3.0f),
       frameCounter(0),
       lastWidth(0),

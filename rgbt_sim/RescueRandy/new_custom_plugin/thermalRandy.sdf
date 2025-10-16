@@ -33,7 +33,7 @@
       name="gz::sim::systems::RadiometricThermalSensor">
       <save_path>/home/dkhuttan/rgbt_project/rgbt_sim/dataset/test/radiometric</save_path>
       <min_temp>253.15</min_temp>
-      <max_temp>320</max_temp>
+      <max_temp>373</max_temp>
       <resolution>3.0</resolution>
     </plugin>
 
@@ -249,6 +249,7 @@
         </visual>
 
         <sensor name="rgb_cam" type="camera">
+          <pose>0 0.05 0 0 0 0</pose>
           <always_on>1</always_on>
           <update_rate>20</update_rate>
           <visualize>false</visualize>
@@ -293,7 +294,7 @@
             filename="ignition-gazebo-thermal-sensor-system"
             name="gz::sim::systems::ThermalSensor">
             <min_temp>253.15</min_temp>
-            <max_temp>320</max_temp>
+            <max_temp>373</max_temp>
             <resolution>3.0</resolution>
           </plugin>
         </sensor>
