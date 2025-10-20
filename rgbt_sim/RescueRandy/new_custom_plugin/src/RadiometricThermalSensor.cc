@@ -24,20 +24,34 @@
 #include <memory>
 #include <string>
 #include <cstring>
+#include <vector>
+#include <iostream>
 
 namespace gz {
 namespace sim {
 namespace systems {
 
-class RadiometricThermalSensor : public System {
+class RadiometricThermalSensor : public System,
+                                  public ISystemConfigure,
+                                  public ISystemPostUpdate {
 public:
   RadiometricThermalSensor();
   ~RadiometricThermalSensor() override;
 
+  void Configure(const Entity &_entity,
+                 const std::shared_ptr<const sdf::Element> &_sdf,
+                 EntityComponentManager &_ecm,
+                 EventManager &_eventMgr) override;
+
+  void PostUpdate(const UpdateInfo &_info,
+                  const EntityComponentManager &_ecm) override;
+
 private:
   void OnThermalImage(const msgs::Image &_msg);
-  bool SaveRadiometricData(const uint16_t *_data, unsigned int _width,
-                           unsigned int _height, uint64_t _frameNum);
+  bool SaveRadiometricData(const std::vector<uint16_t> &_data, 
+                           unsigned int _width,
+                           unsigned int _height, 
+                           uint64_t _frameNum);
 
   transport::Node node;
   std::string savePath;
@@ -45,101 +59,177 @@ private:
   float maxTemp = 373.0f;
   float resolution = 3.0f;
   uint64_t frameCounter = 0;
-
-  std::unique_ptr<uint16_t[]> tempBuffer;
-  std::unique_ptr<float[]> floatBuffer;
-  unsigned int lastWidth = 0;
-  unsigned int lastHeight = 0;
+  bool initialized = false;
 };
 
 RadiometricThermalSensor::RadiometricThermalSensor()
-    : savePath("./thermal_radiometric"),
-      minTemp(253.15f),
-      maxTemp(373.0f),
-      resolution(3.0f),
-      frameCounter(0),
-      lastWidth(0),
-      lastHeight(0)
 {
-  // Subscribe to thermal camera topic
-  this->node.Subscribe("/thermal/image",
-                       &RadiometricThermalSensor::OnThermalImage, this);
-  gzdbg << "Subscribed to /thermal/image" << std::endl;
-
-  // Create save directory
-  system(("mkdir -p " + this->savePath).c_str());
-
-  gzdbg << "RadiometricThermalSensor plugin initialized" << std::endl;
-  gzdbg << "  Save path: " << this->savePath << std::endl;
-  gzdbg << "  Min temp: " << this->minTemp << std::endl;
-  gzdbg << "  Max temp: " << this->maxTemp << std::endl;
-  gzdbg << "  Resolution: " << this->resolution << std::endl;
+  std::cout << "RadiometricThermalSensor: Constructor called" << std::endl;
 }
 
 RadiometricThermalSensor::~RadiometricThermalSensor()
 {
+  std::cout << "RadiometricThermalSensor: Destructor called, saved " 
+            << this->frameCounter << " frames" << std::endl;
+}
+
+void RadiometricThermalSensor::Configure(const Entity &/*_entity*/,
+                                         const std::shared_ptr<const sdf::Element> &_sdf,
+                                         EntityComponentManager &/*_ecm*/,
+                                         EventManager &/*_eventMgr*/)
+{
+  std::cout << "RadiometricThermalSensor: Configure called" << std::endl;
+
+  // Read configuration parameters
+  if (_sdf->HasElement("save_path"))
+  {
+    this->savePath = _sdf->Get<std::string>("save_path");
+  }
+  else
+  {
+    this->savePath = "./thermal_radiometric";
+  }
+
+  if (_sdf->HasElement("min_temp"))
+  {
+    this->minTemp = _sdf->Get<float>("min_temp");
+  }
+
+  if (_sdf->HasElement("max_temp"))
+  {
+    this->maxTemp = _sdf->Get<float>("max_temp");
+  }
+
+  if (_sdf->HasElement("resolution"))
+  {
+    this->resolution = _sdf->Get<float>("resolution");
+  }
+
+  // Create save directory
+  system(("mkdir -p " + this->savePath).c_str());
+
+  // Subscribe to thermal camera topic
+  if (!this->node.Subscribe("/thermal/image",
+                            &RadiometricThermalSensor::OnThermalImage, this))
+  {
+    std::cerr << "RadiometricThermalSensor: Failed to subscribe to /thermal/image" << std::endl;
+  }
+  else
+  {
+    std::cout << "RadiometricThermalSensor: Successfully subscribed to /thermal/image" << std::endl;
+  }
+
+  std::cout << "RadiometricThermalSensor: Plugin configured" << std::endl;
+  std::cout << "  Save path: " << this->savePath << std::endl;
+  std::cout << "  Min temp: " << this->minTemp << "K" << std::endl;
+  std::cout << "  Max temp: " << this->maxTemp << "K" << std::endl;
+  std::cout << "  Resolution: " << this->resolution << "K" << std::endl;
+
+  this->initialized = true;
+}
+
+void RadiometricThermalSensor::PostUpdate(const UpdateInfo &/*_info*/,
+                                          const EntityComponentManager &/*_ecm*/)
+{
+  // This is called every simulation step
+  // We don't need to do anything here, just keeping the plugin alive
 }
 
 void RadiometricThermalSensor::OnThermalImage(const msgs::Image &_msg)
 {
+  if (!this->initialized)
+  {
+    std::cerr << "RadiometricThermalSensor: Received image but not initialized!" << std::endl;
+    return;
+  }
+
+  std::cout << "RadiometricThermalSensor: Received frame " << this->frameCounter << std::endl;
+
   unsigned int width = _msg.width();
   unsigned int height = _msg.height();
-  unsigned int dataSize = width * height;
+  unsigned int pixelCount = width * height;
 
-  // Allocate buffers if size changed
-  if (width != this->lastWidth || height != this->lastHeight)
+  std::cout << "  Image size: " << width << "x" << height << std::endl;
+  std::cout << "  Pixel format: " << _msg.pixel_format_type() << std::endl;
+
+  // Make a complete copy of the data
+  std::vector<uint16_t> thermalData(pixelCount);
+  
+  const std::string& imageData = _msg.data();
+  size_t expectedBytes = pixelCount * sizeof(uint16_t);
+  
+  std::cout << "  Data size: " << imageData.size() << " bytes (expected: " 
+            << expectedBytes << ")" << std::endl;
+
+  if (imageData.size() != expectedBytes)
   {
-    this->tempBuffer = std::make_unique<uint16_t[]>(dataSize);
-    this->floatBuffer = std::make_unique<float[]>(dataSize);
-    this->lastWidth = width;
-    this->lastHeight = height;
+    std::cerr << "  ERROR: Data size mismatch!" << std::endl;
+    this->frameCounter++;
+    return;
   }
 
-  // Copy thermal data
-  const uint16_t *data = reinterpret_cast<const uint16_t *>(_msg.data().c_str());
-  std::memcpy(this->tempBuffer.get(), data, dataSize * sizeof(uint16_t));
+  // Copy the data
+  std::memcpy(thermalData.data(), imageData.data(), expectedBytes);
 
-  // Convert uint16_t to float32 temperature in Kelvin
-  for (unsigned int i = 0; i < dataSize; ++i)
+  // Calculate statistics
+  uint16_t minVal = 65535;
+  uint16_t maxVal = 0;
+  uint64_t sum = 0;
+  
+  for (unsigned int i = 0; i < pixelCount; ++i)
   {
-    this->floatBuffer[i] = this->minTemp + (static_cast<float>(this->tempBuffer[i]) * this->resolution);
+    if (thermalData[i] < minVal) minVal = thermalData[i];
+    if (thermalData[i] > maxVal) maxVal = thermalData[i];
+    sum += thermalData[i];
   }
+  
+  float avgVal = static_cast<float>(sum) / pixelCount;
+  
+  std::cout << "  Raw uint16 range: [" << minVal << ", " << maxVal << "]" << std::endl;
+  std::cout << "  Raw uint16 average: " << avgVal << std::endl;
+  
+  // Convert to temperature
+  float minTempK = this->minTemp + (static_cast<float>(minVal) / 65535.0f) * (this->maxTemp - this->minTemp);
+  float maxTempK = this->minTemp + (static_cast<float>(maxVal) / 65535.0f) * (this->maxTemp - this->minTemp);
+  
+  std::cout << "  Temperature range: [" << minTempK << "K, " << maxTempK << "K]" << std::endl;
 
   // Save data
-  this->SaveRadiometricData(this->tempBuffer.get(), width, height, this->frameCounter);
-
-  if (this->frameCounter % 30 == 0)
+  if (this->SaveRadiometricData(thermalData, width, height, this->frameCounter))
   {
-    gzdbg << "Saved radiometric frame: " << this->frameCounter << std::endl;
+    std::cout << "  Successfully saved frame " << this->frameCounter << std::endl;
+  }
+  else
+  {
+    std::cerr << "  ERROR: Failed to save frame " << this->frameCounter << std::endl;
   }
 
   this->frameCounter++;
 }
 
-bool RadiometricThermalSensor::SaveRadiometricData(const uint16_t *_data,
+bool RadiometricThermalSensor::SaveRadiometricData(const std::vector<uint16_t> &_data,
                                                    unsigned int _width,
                                                    unsigned int _height,
                                                    uint64_t _frameNum)
 {
-  // Create filename
   std::string filename = this->savePath + "/thermal_" +
                          std::to_string(_frameNum) + ".raw";
 
   FILE *file = fopen(filename.c_str(), "wb");
   if (!file)
   {
-    gzerr << "Failed to open file: " << filename << std::endl;
+    std::cerr << "Failed to open file: " << filename << std::endl;
     return false;
   }
 
-  unsigned int dataSize = _width * _height * sizeof(uint16_t);
-
-  // Convert to float32 and write
-  // Map uint16 range (0-65535) to temperature range (minTemp-maxTemp)
-  std::unique_ptr<float[]> floatData = std::make_unique<float[]>(_width * _height);
+  // Convert to float32
+  size_t pixelCount = _width * _height;
+  std::vector<float> floatData(pixelCount);
   float tempRange = this->maxTemp - this->minTemp;
-  for (unsigned int i = 0; i < _width * _height; ++i)
+  
+  for (size_t i = 0; i < pixelCount; ++i)
   {
+    // Normalize uint16 (0-65535) to temperature range
     float normalized = static_cast<float>(_data[i]) / 65535.0f;
     floatData[i] = this->minTemp + (normalized * tempRange);
   }
@@ -149,16 +239,10 @@ bool RadiometricThermalSensor::SaveRadiometricData(const uint16_t *_data,
   fwrite(&_height, sizeof(unsigned int), 1, file);
 
   // Write float32 data
-  size_t written = fwrite(floatData.get(), sizeof(float), _width * _height, file);
+  size_t written = fwrite(floatData.data(), sizeof(float), pixelCount, file);
   fclose(file);
 
-  if (written != _width * _height)
-  {
-    gzerr << "Failed to write all data to file" << std::endl;
-    return false;
-  }
-
-  return true;
+  return (written == pixelCount);
 }
 
 }
@@ -166,7 +250,9 @@ bool RadiometricThermalSensor::SaveRadiometricData(const uint16_t *_data,
 }
 
 GZ_ADD_PLUGIN(gz::sim::systems::RadiometricThermalSensor,
-              gz::sim::System)
+              gz::sim::System,
+              gz::sim::ISystemConfigure,
+              gz::sim::ISystemPostUpdate)
 
 GZ_ADD_PLUGIN_ALIAS(gz::sim::systems::RadiometricThermalSensor,
                     "gz::sim::systems::RadiometricThermalSensor")

@@ -339,7 +339,7 @@ Qt5Widgets_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets
 Qt5_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt5
 
 //Dependencies for the target
-RadiometricThermalSensor_LIB_DEPENDS:STATIC=general;gz-sim9::gz-sim9;general;gz-common6::gz-common6;general;gz-msgs10::gz-msgs10;general;gz-transport13::gz-transport13;
+RadiometricThermalSensor_LIB_DEPENDS:STATIC=general;gz-sim9::gz-sim9;general;gz-common6::gz-common6;general;gz-msgs11::gz-msgs11;general;gz-transport14::gz-transport14;
 
 //Path to a library.
 SWSCALE_LIBRARY_swscale:FILEPATH=/usr/lib/x86_64-linux-gnu/libswscale.so
@@ -404,17 +404,11 @@ gz-fuel_tools10_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-fuel_tools10
 //The directory containing a CMake configuration file for gz-gui9.
 gz-gui9_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-gui9
 
-//The directory containing a CMake configuration file for gz-math7.
-gz-math7_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-math7
-
 //The directory containing a CMake configuration file for gz-math8-eigen3.
 gz-math8-eigen3_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-math8-eigen3
 
 //The directory containing a CMake configuration file for gz-math8.
 gz-math8_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-math8
-
-//The directory containing a CMake configuration file for gz-msgs10.
-gz-msgs10_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-msgs10
 
 //The directory containing a CMake configuration file for gz-msgs11.
 gz-msgs11_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-msgs11
@@ -509,9 +503,6 @@ gz-sensors9_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-sensors9
 //The directory containing a CMake configuration file for gz-sim9.
 gz-sim9_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-sim9
 
-//The directory containing a CMake configuration file for gz-transport13.
-gz-transport13_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-transport13
-
 //The directory containing a CMake configuration file for gz-transport14-log.
 gz-transport14-log_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-transport14-log
 
@@ -520,12 +511,6 @@ gz-transport14-parameters_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-transport1
 
 //The directory containing a CMake configuration file for gz-transport14.
 gz-transport14_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-transport14
-
-//The directory containing a CMake configuration file for gz-utils2-cli.
-gz-utils2-cli_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-utils2-cli
-
-//The directory containing a CMake configuration file for gz-utils2.
-gz-utils2_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-utils2
 
 //The directory containing a CMake configuration file for gz-utils3-cli.
 gz-utils3-cli_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/gz-utils3-cli

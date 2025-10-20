@@ -10,6 +10,7 @@
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
     </physics>
+    <!--
     <plugin
       filename="ignition-gazebo-physics-system"
       name="ignition::gazebo::systems::Physics">
@@ -27,11 +28,54 @@
       filename="ignition-gazebo-user-commands-system"
       name="ignition::gazebo::systems::UserCommands">
     </plugin>
+    <plugin
+      filename="ignition-gazebo-thermal-system"
+      name="ignition::gazebo::systems::Thermal">
+    </plugin>
 
     <plugin
-      filename="RadiometricThermalSensor"
+      filename="libRadiometricThermalSensor.so"
       name="gz::sim::systems::RadiometricThermalSensor">
-      <save_path>/home/dkhuttan/rgbt_project/rgbt_sim/dataset/test/radiometric</save_path>
+      <save_path>/home/dkhuttan/rgbt_project/rgbt_sim/RescueRandy/new_custom_plugin/radiometric</save_path>
+      <min_temp>253.15</min_temp>
+      <max_temp>373</max_temp>
+      <resolution>3.0</resolution>
+    </plugin> -->
+    <plugin
+      filename="gz-sim-physics-system"
+      name="gz::sim::systems::Physics">
+    </plugin>
+
+    <plugin
+      filename="gz-sim-user-commands-system"
+      name="gz::sim::systems::UserCommands">
+    </plugin>
+
+    <plugin
+      filename="gz-sim-scene-broadcaster-system"
+      name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+
+    <plugin
+      filename="gz-sim-sensors-system"
+      name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    
+    <plugin
+      filename="gz-sim-thermal-system"
+      name="gz::sim::systems::Thermal">
+      <!--
+      <temperature>293.15</temperature>
+      <min_temp>253.15</min_temp>
+      <max_temp>373.0</max_temp>
+      <resolution>3.0</resolution> -->
+    </plugin>
+
+    <plugin
+      filename="libRadiometricThermalSensor.so"
+      name="gz::sim::systems::RadiometricThermalSensor">
+      <save_path>/home/dkhuttan/rgbt_project/rgbt_sim/RescueRandy/new_custom_plugin/radiometric</save_path>
       <min_temp>253.15</min_temp>
       <max_temp>373</max_temp>
       <resolution>3.0</resolution>
@@ -181,11 +225,17 @@
             <diffuse>0.8 0.8 0.8 1</diffuse>
             <specular>0.8 0.8 0.8 1</specular>
           </material>
+          <plugin
+            filename="gz-sim-thermal-system"
+            name="gz::sim::systems::Thermal">
+            <temperature>290.0</temperature>
+          </plugin>
         </visual>
       </link>
     </model>
 
     <model name="box">
+      <static>false</static>
       <pose>-1 1 0.5 0 0 0</pose>
       <link name="box_link">
         <inertial>
@@ -206,6 +256,11 @@
             </box>
           </geometry>
         </collision>
+         <plugin
+          filename="gz-sim-thermal-system"
+          name="gz::sim::systems::Thermal">
+          <temperature>280.0</temperature>
+        </plugin>
 
         <visual name="box_visual">
           <geometry>
@@ -218,11 +273,6 @@
             <diffuse>1 0 0 1</diffuse>
             <specular>1 0 0 1</specular>
           </material>
-          <plugin
-            filename="ignition-gazebo-thermal-system"
-            name="ignition::gazebo::systems::Thermal">
-            <temperature>285.0</temperature>
-          </plugin>
         </visual>
       </link>
     </model>
@@ -256,8 +306,8 @@
           <topic>/rgb/image</topic>
           <camera>
             <save enabled="true">
-              <path>/home/dkhuttan/rgbt_sim/dataset/test/rgb</path>
-              <format>tif</format>
+              <path>/home/dkhuttan/rgbt_project/rgbt_sim/RescueRandy/new_custom_plugin/rgb</path>
+              <format>png</format>
             </save>
             <image>
               <width>1280</width>
@@ -266,14 +316,13 @@
             </image>
             <clip><near>0.05</near><far>200</far></clip>
           </camera>
-
         </sensor>
 
         <sensor name="thermal_camera" type="thermal">
           <camera>
             <save enabled="true">
-              <path>/home/dkhuttan/rgbt_sim/dataset/test/thermal</path>
-              <format>tif</format>
+              <path>/home/dkhuttan/rgbt_project/rgbt_sim/RescueRandy/new_custom_plugin/thermal</path>
+              <format>png</format>
             </save>
             <horizontal_fov>1.047</horizontal_fov>
             <image>
@@ -287,28 +336,12 @@
             </clip>
           </camera>
           <always_on>1</always_on>
-          <update_rate>30</update_rate>
+          <update_rate>20</update_rate>
           <visualize>true</visualize>
           <topic>/thermal/image</topic>
-          <plugin
-            filename="ignition-gazebo-thermal-sensor-system"
-            name="gz::sim::systems::ThermalSensor">
-            <min_temp>253.15</min_temp>
-            <max_temp>373</max_temp>
-            <resolution>3.0</resolution>
-          </plugin>
         </sensor>
-
-
-
-
-
-        
       </link>
     </model>
-
-
-
 
 
 
@@ -329,6 +362,8 @@
       <name>backpack</name>
       <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Backpack</uri>
     </include>
+
+
 
   </world>
 </sdf>
