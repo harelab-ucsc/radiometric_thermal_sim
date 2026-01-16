@@ -1,11 +1,14 @@
 <?xml version="1.0" ?>
-<!--
-  Demo world consisting of a thermal camera sensor and several models with
-  different temperatures specified via the thermal system plugin.
--->
 
 <sdf version="1.6">
   <world name="thermal_world">
+  
+  <scene>
+    <sky>
+      <cubemap_uri>file:///skybox/skybox.exr</cubemap_uri>
+    </sky>
+  </scene>
+
     <physics name="1ms" type="ignored">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
@@ -196,26 +199,26 @@
       <temperature_gradient>0.1</temperature_gradient>
     </atmosphere>
 
+
+
+
     <model name="ground_plane">
       <static>true</static>
       <link name="link">
         <collision name="collision">
           <geometry>
-            <!--plane>
+            <plane>
               <normal>0 0 1</normal>
               <size>100 100</size>
-            </plane-->
+            </plane>
             <box>
               <size>20 20 0.1</size>
             </box>
           </geometry>
         </collision>
+        <!--
         <visual name="visual">
           <geometry>
-            <!--plane>
-              <normal>0 0 1</normal>
-              <size>100 100</size>
-            </plane-->
             <box>
               <size>20 20 0.1</size>
             </box>
@@ -230,7 +233,8 @@
             name="gz::sim::systems::Thermal">
             <temperature>290.0</temperature>
           </plugin>
-        </visual>
+        </visual> -->
+        
       </link>
     </model>
 
@@ -283,7 +287,7 @@
 
     <model name="camera_rig">
       <static>true</static>
-      <pose>7 0 1.5 0 0 3.14</pose>
+      <pose>7 0 0.7 0 0 3.14</pose>
       <link name="cam_link">
         
          <!-- x y z roll pitch yaw -->
@@ -362,8 +366,27 @@
       <name>backpack</name>
       <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Backpack</uri>
     </include>
+<!--
+    <include>
+      <pose>0 0 -0.5 0 0 0</pose>
+      <name>terrain</name>
+      <uri>https://fuel.gazebosim.org/1.0/jasmeetsingh/models/Mars Gale Crater Patch 2</uri>
+    </include> 
 
 
+    <include>
+      <pose>0 5 0 0 0 0</pose>
+      <name>campus</name>
+      <uri>https://fuel.gazebosim.org/1.0/hujp/models/Campus</uri>
+    </include>
+    -->
+
+
+    <include>
+      <pose>230 10 -1.4 0 0 0</pose>
+      <name>campus</name>
+      <uri>https://fuel.gazebosim.org/1.0/bdilman/models/baylands_2</uri>
+    </include>
 
   </world>
 </sdf>

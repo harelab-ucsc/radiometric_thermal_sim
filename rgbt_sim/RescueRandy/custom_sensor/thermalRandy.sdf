@@ -273,7 +273,7 @@
         <sensor name="thermal_camera" type="thermal">
           <camera>
             <save enabled="true">
-              <path>/home/dkhuttan/rgbt_sim/dataset/test/thermal</path>
+              <path>/home/dkhuttan/rgbt_sim/RescueRandy/custom_sensor/thermal</path>
               <format>tif</format>
             </save>
             <horizontal_fov>1.047</horizontal_fov>
