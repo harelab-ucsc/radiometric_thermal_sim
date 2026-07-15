@@ -94,6 +94,8 @@ python3 scripts/read.py output/radiometric/thermal_0.raw
 
 This prints min/max/mean temperature and offers to pop up a matplotlib heatmap with a Kelvin colorbar.
 
+![Radiometric heatmap](/media/thermal_visualization.png)
+
 If you'd rather convert the PNGs Gazebo already saved in `output/thermal/` instead of relying on the live topic subscription (useful if you only care about the frames you explicitly saved, or want to reprocess with a different resolution later):
 
 ```bash
