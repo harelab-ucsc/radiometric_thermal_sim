@@ -1,6 +1,6 @@
 # radiometric_thermal_sim
 
-A Gazebo (gz-sim / Gazebo Harmonic) simulation with a custom sensor plugin that turns Gazebo's thermal camera into a proper **radiometric** thermal camera — meaning every pixel comes out as an actual temperature in Kelvin, not just a normalized grayscale image for looking at.
+A Gazebo (gz-sim / Gazebo Harmonic) simulation with a custom sensor plugin that turns Gazebo's non-radiometric thermal camera into a proper **radiometric** thermal camera — meaning every pixel comes out as an actual temperature in Kelvin, not just a normalized grayscale image for looking at.
 
 The scene is a small search-and-rescue setup: a "Rescue Randy" mannequin, a phone, a backpack, and a couple of objects with different temperatures, sitting on Gazebo's Baylands terrain. A camera rig with a paired RGB + thermal camera looks at the scene from a fixed point, and the plugin subscribes to the thermal topic, decodes the raw sensor data into real temperatures, and writes it out as `.raw` float32 files you can load in numpy.
 
