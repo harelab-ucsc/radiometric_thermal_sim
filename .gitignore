@@ -1,0 +1,16 @@
+# Build artifacts
+plugins/radiometric_thermal_sensor/build/
+
+# Generated simulation output (rgb/thermal PNGs, radiometric .raw files)
+output/
+
+# Python
+__pycache__/
+*.pyc
+
+# Generated visualizations / recordings
+*.csv
+thermal_visualization.png
+
+# Editor
+.vscode/
