@@ -57,7 +57,13 @@ private:
   std::string savePath;
   float minTemp = 253.15f;
   float maxTemp = 373.0f;
-  float resolution = 3.0f;
+  // Kelvin per raw uint16 count. Per gz-sim's actual ThermalSensor/thermal
+  // camera semantics: raw = clamp(temp, min_temp, max_temp) / resolution,
+  // i.e. temp = raw * resolution (min_temp/max_temp are input clamps only,
+  // not an offset in the conversion). Must match the resolution configured
+  // on the camera's gz::sim::systems::ThermalSensor plugin. gz-sim's own
+  // default for a 16-bit (L16) thermal camera is 0.01 K/count.
+  float resolution = 0.01f;
   uint64_t frameCounter = 0;
   bool initialized = false;
 };
@@ -188,9 +194,9 @@ void RadiometricThermalSensor::OnThermalImage(const msgs::Image &_msg)
   std::cout << "  Raw uint16 range: [" << minVal << ", " << maxVal << "]" << std::endl;
   std::cout << "  Raw uint16 average: " << avgVal << std::endl;
   
-  // Convert to temperature
-  float minTempK = this->minTemp + (static_cast<float>(minVal) / 65535.0f) * (this->maxTemp - this->minTemp);
-  float maxTempK = this->minTemp + (static_cast<float>(maxVal) / 65535.0f) * (this->maxTemp - this->minTemp);
+  // Convert to temperature: temp = raw * resolution
+  float minTempK = static_cast<float>(minVal) * this->resolution;
+  float maxTempK = static_cast<float>(maxVal) * this->resolution;
   
   std::cout << "  Temperature range: [" << minTempK << "K, " << maxTempK << "K]" << std::endl;
 
@@ -225,13 +231,11 @@ bool RadiometricThermalSensor::SaveRadiometricData(const std::vector<uint16_t> &
   // Convert to float32
   size_t pixelCount = _width * _height;
   std::vector<float> floatData(pixelCount);
-  float tempRange = this->maxTemp - this->minTemp;
-  
+
   for (size_t i = 0; i < pixelCount; ++i)
   {
-    // Normalize uint16 (0-65535) to temperature range
-    float normalized = static_cast<float>(_data[i]) / 65535.0f;
-    floatData[i] = this->minTemp + (normalized * tempRange);
+    // Match the ThermalSensor plugin's encoding: temp = raw * resolution
+    floatData[i] = static_cast<float>(_data[i]) * this->resolution;
   }
 
   // Write header (width, height)

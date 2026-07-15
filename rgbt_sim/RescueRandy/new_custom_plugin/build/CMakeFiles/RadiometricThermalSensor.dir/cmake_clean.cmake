@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/RadiometricThermalSensor.dir/link.d"
   "CMakeFiles/RadiometricThermalSensor.dir/src/RadiometricThermalSensor.cc.o"
   "CMakeFiles/RadiometricThermalSensor.dir/src/RadiometricThermalSensor.cc.o.d"
   "libRadiometricThermalSensor.pdb"

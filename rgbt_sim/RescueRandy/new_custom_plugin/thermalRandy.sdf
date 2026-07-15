@@ -5,7 +5,7 @@
   
   <scene>
     <sky>
-      <cubemap_uri>file:///skybox/skybox.exr</cubemap_uri>
+      <cubemap_uri>file:///home/dkhuttan/projects/radiometric_thermal_sim/rgbt_sim/RescueRandy/new_custom_plugin/skybox/skybox.exr</cubemap_uri>
     </sky>
   </scene>
 
@@ -13,37 +13,6 @@
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
     </physics>
-    <!--
-    <plugin
-      filename="ignition-gazebo-physics-system"
-      name="ignition::gazebo::systems::Physics">
-    </plugin>
-    <plugin
-      filename="ignition-gazebo-sensors-system"
-      name="ignition::gazebo::systems::Sensors">
-      <render_engine>ogre2</render_engine>
-    </plugin>
-    <plugin
-      filename="ignition-gazebo-scene-broadcaster-system"
-      name="ignition::gazebo::systems::SceneBroadcaster">
-    </plugin>
-    <plugin
-      filename="ignition-gazebo-user-commands-system"
-      name="ignition::gazebo::systems::UserCommands">
-    </plugin>
-    <plugin
-      filename="ignition-gazebo-thermal-system"
-      name="ignition::gazebo::systems::Thermal">
-    </plugin>
-
-    <plugin
-      filename="libRadiometricThermalSensor.so"
-      name="gz::sim::systems::RadiometricThermalSensor">
-      <save_path>/home/dkhuttan/rgbt_project/rgbt_sim/RescueRandy/new_custom_plugin/radiometric</save_path>
-      <min_temp>253.15</min_temp>
-      <max_temp>373</max_temp>
-      <resolution>3.0</resolution>
-    </plugin> -->
     <plugin
       filename="gz-sim-physics-system"
       name="gz::sim::systems::Physics">
@@ -64,24 +33,27 @@
       name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
-    
-    <plugin
-      filename="gz-sim-thermal-system"
-      name="gz::sim::systems::Thermal">
-      <!--
-      <temperature>293.15</temperature>
-      <min_temp>253.15</min_temp>
-      <max_temp>373.0</max_temp>
-      <resolution>3.0</resolution> -->
-    </plugin>
+
+    <!-- No world-level "Thermal" system plugin here on purpose: it requires
+         <temperature> or <heat_signature> and would fail to load with
+         neither. The Thermal system only needs to be declared once, right
+         where a temperature is actually being set (see box_visual below);
+         gz-sim loads it on demand. This matches gz-sim's own
+         /usr/share/gz/gz-sim9/worlds/thermal_camera.sdf reference world. -->
 
     <plugin
-      filename="libRadiometricThermalSensor.so"
+      filename="/home/dkhuttan/projects/radiometric_thermal_sim/rgbt_sim/RescueRandy/new_custom_plugin/build/libRadiometricThermalSensor.so"
       name="gz::sim::systems::RadiometricThermalSensor">
-      <save_path>/home/dkhuttan/rgbt_project/rgbt_sim/RescueRandy/new_custom_plugin/radiometric</save_path>
+      <save_path>/home/dkhuttan/projects/radiometric_thermal_sim/rgbt_sim/RescueRandy/new_custom_plugin/radiometric</save_path>
+      <!-- min_temp/max_temp/resolution MUST match the ThermalSensor plugin
+           on the thermal_camera sensor below, or decoded temperatures will
+           be wrong. gz-sim's actual encoding is temp = raw * resolution
+           (min_temp/max_temp only clamp the input temperature, they are not
+           an offset). 0.01 K/count is gz-sim's own default for L16 and gives
+           a representable range up to 655.35K, comfortably above max_temp. -->
       <min_temp>253.15</min_temp>
       <max_temp>373</max_temp>
-      <resolution>3.0</resolution>
+      <resolution>0.01</resolution>
     </plugin>
 
     <gui fullscreen="0">
@@ -207,10 +179,6 @@
       <link name="link">
         <collision name="collision">
           <geometry>
-            <plane>
-              <normal>0 0 1</normal>
-              <size>100 100</size>
-            </plane>
             <box>
               <size>20 20 0.1</size>
             </box>
@@ -260,11 +228,6 @@
             </box>
           </geometry>
         </collision>
-         <plugin
-          filename="gz-sim-thermal-system"
-          name="gz::sim::systems::Thermal">
-          <temperature>280.0</temperature>
-        </plugin>
 
         <visual name="box_visual">
           <geometry>
@@ -277,6 +240,11 @@
             <diffuse>1 0 0 1</diffuse>
             <specular>1 0 0 1</specular>
           </material>
+          <plugin
+            filename="gz-sim-thermal-system"
+            name="gz::sim::systems::Thermal">
+            <temperature>280.0</temperature>
+          </plugin>
         </visual>
       </link>
     </model>
@@ -311,7 +279,6 @@
           <camera>
             <save enabled="true">
               <path>/home/dkhuttan/projects/radiometric_thermal_sim/rgbt_sim/RescueRandy/new_custom_plugin/dataset/rgb</path>
-              <format>png</format>
             </save>
             <image>
               <width>1280</width>
@@ -326,13 +293,12 @@
           <camera>
             <save enabled="true">
               <path>/home/dkhuttan/projects/radiometric_thermal_sim/rgbt_sim/RescueRandy/new_custom_plugin/dataset/thermal</path>
-              <format>png</format>
             </save>
             <horizontal_fov>1.047</horizontal_fov>
             <image>
               <width>320</width>
               <height>240</height>
-              <format>L8</format>
+              <format>L16</format>
             </image>
             <clip>
               <near>0.1</near>
@@ -343,6 +309,16 @@
           <update_rate>20</update_rate>
           <visualize>true</visualize>
           <topic>/thermal/image</topic>
+          <plugin
+            filename="gz-sim-thermal-sensor-system"
+            name="gz::sim::systems::ThermalSensor">
+            <!-- MUST match min_temp/max_temp/resolution on the
+                 RadiometricThermalSensor plugin above, or decoded
+                 temperatures will be wrong. -->
+            <min_temp>253.15</min_temp>
+            <max_temp>373</max_temp>
+            <resolution>0.01</resolution>
+          </plugin>
         </sensor>
       </link>
     </model>
