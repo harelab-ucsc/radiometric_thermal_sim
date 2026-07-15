@@ -310,7 +310,7 @@
           <topic>/rgb/image</topic>
           <camera>
             <save enabled="true">
-              <path>/home/dkhuttan/rgbt_project/rgbt_sim/RescueRandy/new_custom_plugin/rgb</path>
+              <path>/home/dkhuttan/projects/radiometric_thermal_sim/rgbt_sim/RescueRandy/new_custom_plugin/dataset/rgb</path>
               <format>png</format>
             </save>
             <image>
@@ -325,14 +325,14 @@
         <sensor name="thermal_camera" type="thermal">
           <camera>
             <save enabled="true">
-              <path>/home/dkhuttan/rgbt_project/rgbt_sim/RescueRandy/new_custom_plugin/thermal</path>
+              <path>/home/dkhuttan/projects/radiometric_thermal_sim/rgbt_sim/RescueRandy/new_custom_plugin/dataset/thermal</path>
               <format>png</format>
             </save>
             <horizontal_fov>1.047</horizontal_fov>
             <image>
               <width>320</width>
               <height>240</height>
-              <format>L16</format>
+              <format>L8</format>
             </image>
             <clip>
               <near>0.1</near>

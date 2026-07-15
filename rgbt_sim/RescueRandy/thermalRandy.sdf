@@ -288,6 +288,8 @@
             <resolution>3.0</resolution>
           </plugin>
         </sensor>
+      </link>
+    </model>
 
 
 
