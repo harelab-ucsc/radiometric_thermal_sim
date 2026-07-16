@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/dkhuttan/projects/radiometric_thermal_sim/plugins/radiometric_depth_sensor/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
